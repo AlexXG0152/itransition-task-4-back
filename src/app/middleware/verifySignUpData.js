@@ -1,10 +1,9 @@
-import { user } from "../models";
+import { db } from "../models/index.js";
 
-const User = user;
+const User = db.user;
 
 export const checkDuplicateUsernameOrEmail = async (req, res, next) => {
   try {
-    // Username
     let user = await User.findOne({
       where: {
         username: req.body.username,
@@ -17,7 +16,6 @@ export const checkDuplicateUsernameOrEmail = async (req, res, next) => {
       });
     }
 
-    // Email
     user = await User.findOne({
       where: {
         email: req.body.email,

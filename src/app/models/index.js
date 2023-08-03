@@ -1,5 +1,6 @@
 import { Sequelize } from "sequelize";
 import User from "../models/user.model.js";
+import RefreshToken from "../models/refreshToken.model.js";
 import dotenv from "dotenv";
 
 if (process.env.NODE_ENV !== "production") {
@@ -27,3 +28,13 @@ export const db = {};
 db.Sequelize = Sequelize;
 db.sequelize = sequelize;
 db.user = User(sequelize, Sequelize);
+db.refreshToken = RefreshToken(sequelize, Sequelize);
+
+db.refreshToken.belongsTo(db.user, {
+  foreignKey: "userId",
+  targetKey: "id",
+});
+db.user.hasOne(db.refreshToken, {
+  foreignKey: "userId",
+  targetKey: "id",
+});

@@ -1,12 +1,7 @@
-import { verify } from "jsonwebtoken";
-import dotenv from "dotenv";
-
-if (process.env.NODE_ENV !== "production") {
-  dotenv.config({ path: "./src/environments/.env" });
-}
+import jsonwebtoken from "jsonwebtoken";
 
 export const verifyJWToken = (req, res, next) => {
-  let token = req.session.token;
+  let token = req.headers["authorization"];
 
   if (!token) {
     return res.status(403).send({
@@ -14,13 +9,17 @@ export const verifyJWToken = (req, res, next) => {
     });
   }
 
-  verify(token, process.env.JSONWEBTOKEN, (err, decoded) => {
-    if (err) {
-      return res.status(401).send({
-        message: "Unauthorized!",
-      });
+  jsonwebtoken.verify(
+    token,
+    process.env.JSONWEBTOKEN_SECRET,
+    (err, decoded) => {
+      if (err) {
+        return res.status(401).send({
+          message: "Unauthorized!",
+        });
+      }
+      req.userId = decoded.id;
+      next();
     }
-    req.userId = decoded.id;
-    next();
-  });
+  );
 };
