@@ -5,6 +5,8 @@ import dotenv from "dotenv";
 import { router } from "./src/app/routes/index.js";
 import { db } from "./src/app/models/index.js";
 
+import { initial } from "./src/helpers/createAndFillDbWithMockData.js";
+
 if (process.env.NODE_ENV !== "production") {
   dotenv.config({ path: "./src/environments/.env" });
 }
@@ -35,6 +37,8 @@ const start = async () => {
   try {
     await db.sequelize.authenticate();
     await db.sequelize.sync({ force: true });
+    await initial(17);
+
     app.listen(PORT, () => {
       console.log(`\nServer is running on port ${PORT}.\n`);
     });
