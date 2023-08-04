@@ -1,6 +1,6 @@
 import jsonwebtoken from "jsonwebtoken";
 
-export const verifyJWToken = (req, res, next) => {
+export const verifyJWToken = async (req, res, next) => {
   let token = req.headers["authorization"];
 
   if (!token) {

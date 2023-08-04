@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { verifyJWToken } from "../middleware/authJwt.js";
+import { verifyAuthTokenRevoke } from "../middleware/verifyAuthTokenRevoke.js";
 import {
   createUser,
   getUsers,
@@ -15,11 +16,27 @@ userRouter.use(function (req, res, next) {
     "Access-Control-Allow-Headers",
     "Origin, Content-Type, Accept, Authorization"
   );
-  next(); 
+  next();
 });
 
-userRouter.post("/api/users", [verifyJWToken], createUser);
-userRouter.get("/api/users", [verifyJWToken], getUsers);
-userRouter.get("/api/users/:id", [verifyJWToken], getUserById);
-userRouter.put("/api/users/:id", [verifyJWToken], updateUser);
-userRouter.delete("/api/users/:id", [verifyJWToken], deleteUser);
+userRouter.post(
+  "/api/users",
+  [verifyJWToken, verifyAuthTokenRevoke],
+  createUser
+);
+userRouter.get("/api/users", [verifyJWToken, verifyAuthTokenRevoke], getUsers);
+userRouter.get(
+  "/api/users/:id",
+  [verifyJWToken, verifyAuthTokenRevoke],
+  getUserById
+);
+userRouter.put(
+  "/api/users/:id",
+  [verifyJWToken, verifyAuthTokenRevoke],
+  updateUser
+);
+userRouter.delete(
+  "/api/users/:id",
+  [verifyJWToken, verifyAuthTokenRevoke],
+  deleteUser
+);

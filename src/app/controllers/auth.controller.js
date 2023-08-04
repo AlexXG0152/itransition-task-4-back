@@ -5,6 +5,7 @@ import { db } from "../models/index.js";
 import { createUser } from "../controllers/user.controller.js";
 
 const User = db.user;
+const AuthToken = db.AuthToken;
 const RefreshToken = db.refreshToken;
 
 export async function signup(req, res) {
@@ -47,6 +48,7 @@ export async function signin(req, res) {
       }
     );
 
+    await AuthToken.writeToken(user.id, token);
     let refreshToken = await RefreshToken.createToken(user);
 
     return res.status(200).send({
@@ -64,9 +66,12 @@ export async function signin(req, res) {
 
 export async function signout(req, res) {
   try {
+    const token = req.headers["authorization"];
+    AuthToken.destroy({ where: { token: token } });
+    // RefreshToken.destroy({ where: { userId: userId } });
+
     req.session = null;
 
-    // RefreshToken.destroy({ where: { userId: refreshToken.userId } });
     return res.status(200).send({
       accessToken: "",
       refreshToken: "",
@@ -94,8 +99,6 @@ export async function refreshToken(req, res) {
       res.status(403).json({ message: "Refresh token is not in database!" });
       return;
     }
-
-    console.log('refreshTokenrefreshToefreshTokenrefreshToken', refreshToken);
 
     if (RefreshToken.verifyExpiration(refreshToken)) {
       RefreshToken.destroy({ where: { id: refreshToken.id } });

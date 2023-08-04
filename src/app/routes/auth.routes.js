@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { checkDuplicateUsernameOrEmail } from "../middleware/verifySignUpData.js";
+import { verifyAuthTokenRevoke } from "../middleware/verifyAuthTokenRevoke.js";
 import { verifyJWToken } from "../middleware/authJwt.js";
 import {
   signup,
@@ -23,6 +24,10 @@ authRouter.post("/api/auth/signup", [checkDuplicateUsernameOrEmail], signup);
 
 authRouter.post("/api/auth/signin", signin);
 
-authRouter.post("/api/auth/signout", [verifyJWToken], signout);
+authRouter.post(
+  "/api/auth/signout",
+  [verifyJWToken, verifyAuthTokenRevoke],
+  signout
+);
 
 authRouter.post("/api/auth/refreshtoken", refreshToken);
