@@ -3,7 +3,6 @@ import { db } from "../models/index.js";
 import { signout } from "./auth.controller.js";
 
 const User = db.user;
-const RefreshToken = db.refreshToken;
 
 export async function createUser(req, res) {
   try {
@@ -100,7 +99,7 @@ export async function deleteUser(req, res) {
 
     await user.destroy();
 
-    await signout(req, res)
+    await signout(req, res);
 
     // res.status(204).json();
   } catch (error) {
