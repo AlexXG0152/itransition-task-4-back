@@ -25,6 +25,7 @@ export default (sequelize, Sequelize) => {
     },
     deleteDate: {
       type: Sequelize.DATE,
+      allowNull: true,
     },
     status: {
       type: Sequelize.STRING,
