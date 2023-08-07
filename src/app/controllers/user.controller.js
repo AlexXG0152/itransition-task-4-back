@@ -11,6 +11,7 @@ export async function createUser(req, res) {
       email: req.body.email,
       password: bcryptjs.hashSync(req.body.password, 8),
       registrationDate: Date.now(),
+      lastLoginDateDate: null,
       status: "active",
     });
 
@@ -27,7 +28,7 @@ export async function getUsers(req, res) {
   try {
     const users = await User.findAll({
       attributes: {
-        exclude: ["password"],
+        exclude: ["password", "createdAt", "updatedAt"],
       },
     });
 
@@ -44,7 +45,7 @@ export async function getUserById(req, res) {
 
     const user = await User.findByPk(id, {
       attributes: {
-        exclude: ["password"],
+        exclude: ["password", "createdAt", "updatedAt"],
       },
     });
 
@@ -61,26 +62,28 @@ export async function getUserById(req, res) {
 
 export async function updateUser(req, res) {
   try {
-    const { id } = req.params;
-    const { username, email, password, registrationDate, status } = req.body;
+    // const { id } = req.params;
+    for (const item of req.body.data) {
+      const { id, username, email, password, status } = item;
 
-    const user = await User.findByPk(id);
+      const user = await User.findByPk(id);
 
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      user.username = username || user.username;
+      user.email = email || user.email;
+      if (password) {
+        user.password = bcryptjs.hashSync(password, 8);
+      }
+      user.status = status || user.status;
+
+      await user.save();
+
+      // res.status(200).json(user);
     }
-
-    user.username = username;
-    user.email = email;
-    user.password = bcryptjs.hashSync(password, 8);
-    user.registrationDate = user.registrationDate;
-    user.status = status;
-
-    await user.save();
-
-    user.password = "";
-
-    res.status(200).json(user);
+    return res.status(200).json({ message: "Done!" });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Internal server error" });

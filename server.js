@@ -15,9 +15,7 @@ const PORT = process.env.PORT || 8080;
 
 const app = express();
 
-const corsOptions = {
-  origin: "http://localhost:8081",
-};
+const corsOptions = { credentials: true, origin: "http://localhost:4200" };
 
 app.use(cors(corsOptions));
 app.use(json());
@@ -37,7 +35,7 @@ const start = async () => {
   try {
     await db.sequelize.authenticate();
     await db.sequelize.sync({ force: true });
-    await initial(17);
+    await initial(15);
 
     app.listen(PORT, () => {
       console.log(`\nServer is running on port ${PORT}.\n`);

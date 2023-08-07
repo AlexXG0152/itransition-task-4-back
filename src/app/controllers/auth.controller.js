@@ -2,7 +2,7 @@ import jsonwebtoken from "jsonwebtoken";
 import bcryptjs from "bcryptjs";
 
 import { db } from "../models/index.js";
-import { createUser } from "../controllers/user.controller.js";
+import { createUser, updateUser } from "../controllers/user.controller.js";
 
 const User = db.user;
 const AuthToken = db.AuthToken;
@@ -51,6 +51,10 @@ export async function signin(req, res) {
     await AuthToken.writeToken(user.id, token);
     let refreshToken = await RefreshToken.createToken(user);
 
+    const userForUpdate = await User.findByPk(user.id);
+    userForUpdate.lastLoginDate = Date.now();
+    await userForUpdate.save()
+
     return res.status(200).send({
       id: user.id,
       username: user.username,
@@ -66,7 +70,7 @@ export async function signin(req, res) {
 
 export async function signout(req, res) {
   try {
-    const token = req.headers["authorization"];
+    const token = req.headers.authorization?.split(" ")[1] || "";
     AuthToken.destroy({ where: { token: token } });
     // RefreshToken.destroy({ where: { userId: userId } });
 

@@ -30,8 +30,8 @@ userRouter.get(
   [verifyJWToken, verifyAuthTokenRevoke],
   getUserById
 );
-userRouter.put(
-  "/api/users/:id",
+userRouter.patch(
+  "/api/users",
   [verifyJWToken, verifyAuthTokenRevoke],
   updateUser
 );

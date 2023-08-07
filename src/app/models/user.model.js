@@ -27,6 +27,10 @@ export default (sequelize, Sequelize) => {
       type: Sequelize.DATE,
       allowNull: true,
     },
+    lastLoginDate: {
+      type: Sequelize.DATE,
+      allowNull: true,
+    },
     status: {
       type: Sequelize.STRING,
       allowNull: false,
