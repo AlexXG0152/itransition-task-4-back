@@ -1,7 +1,7 @@
 import jsonwebtoken from "jsonwebtoken";
 
 export const verifyJWToken = async (req, res, next) => {
-  let token = req.headers["authorization"];
+  let token = req.headers.authorization?.split(" ")[1] || "";
 
   if (!token) {
     return res.status(403).send({

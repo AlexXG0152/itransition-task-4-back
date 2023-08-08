@@ -3,7 +3,7 @@ import { db } from "../models/index.js";
 const AuthToken = db.AuthToken;
 
 export const verifyAuthTokenRevoke = async (req, res, next) => {
-  let token = req.headers["authorization"];
+  let token = req.headers.authorization?.split(" ")[1]|| "";
 
   if (!token) {
     return res.status(403).send({

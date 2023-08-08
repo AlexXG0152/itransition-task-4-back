@@ -4,7 +4,8 @@
   "description": "itransition-task-4-back",
   "main": "index.js",
   "scripts": {
-    "start": "nodemon server.js",
+    "serve": "nodemon server.js",
+    "start": "node server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
@@ -24,5 +25,8 @@
     "nodemon": "^3.0.1",
     "sequelize": "^6.32.1",
     "uuid": "^9.0.0"
+  },
+  "engines": {
+    "node": "18.x"
   }
 }

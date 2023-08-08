@@ -21,11 +21,13 @@ export async function signin(req, res) {
   try {
     const user = await User.findOne({
       where: {
-        username: req.body.username,
+        email: req.body.email,
+        status: 'active'
       },
     });
 
     if (!user) return res.status(404).send({ message: "User Not found." });
+    if( user.status === "blocked" || user.status === "deleted") return res.status(403).send({ message: "User was block or deleted." })
 
     const passwordIsValid = bcryptjs.compareSync(
       req.body.password,
@@ -51,6 +53,10 @@ export async function signin(req, res) {
     await AuthToken.writeToken(user.id, token);
     let refreshToken = await RefreshToken.createToken(user);
 
+    const userForUpdate = await User.findByPk(user.id);
+    userForUpdate.lastLoginDate = Date.now();
+    await userForUpdate.save();
+
     return res.status(200).send({
       id: user.id,
       username: user.username,
@@ -66,17 +72,27 @@ export async function signin(req, res) {
 
 export async function signout(req, res) {
   try {
-    const token = req.headers["authorization"];
-    AuthToken.destroy({ where: { token: token } });
-    // RefreshToken.destroy({ where: { userId: userId } });
+    const token = req.headers.authorization?.split(" ")[1] || "";
+
+    jsonwebtoken.verify(
+      token,
+      process.env.JSONWEBTOKEN_SECRET,
+      (err, decoded) => {
+        if (err) {
+          return res.status(401).send({
+            message: "Unauthorized!",
+          });
+        }
+        req.userId = decoded.id;
+      }
+    );
+
+    AuthToken.destroy({ where: { userId: req.userId } });
+    RefreshToken.destroy({ where: { userId: req.userId } });
 
     req.session = null;
 
-    return res.status(200).send({
-      accessToken: "",
-      refreshToken: "",
-      message: "You've been signed out!",
-    });
+    return res.status(200).send({ message: "You've been signed out!" });
   } catch (error) {
     console.error(error);
     this.next(error);
@@ -123,6 +139,30 @@ export async function refreshToken(req, res) {
       accessToken: newAccessToken,
       refreshToken: refreshToken.token,
     });
+  } catch (error) {
+    return res.status(500).send({ message: error });
+  }
+}
+
+export async function checkAccessToken(req, res) {
+  const { accessToken: accessToken } =
+    req.headers.authorization?.split(" ")[1] || "";
+
+  if (accessToken == null) {
+    return res.status(403).json({ message: "Access Token is required!" });
+  }
+
+  try {
+    let isAuth = await AuthToken.findOne({
+      where: { token: accessToken },
+    });
+
+    if (!isAuth) {
+      res.status(403).json({ message: "Access token is not in database!" });
+      return;
+    }
+
+    return res.status(200).json({ message: "Access Token is active" });
   } catch (error) {
     return res.status(500).send({ message: error });
   }

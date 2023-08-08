@@ -9,10 +9,15 @@ export async function initial(count) {
   const data = [];
 
   for (let i = 0; i < count; i++) {
+    let email = `${createData(10, possibleCharacters)}@${createData(5, possibleCharacters)}.${createData(3, possibleCharacters.slice(0, -10))}`;
+
     let user = {
-      username: createData(8, possibleCharacters),
-      email: createData(10, possibleCharacters),
-      password: bcryptjs.hashSync(createData(12, possibleCharacters), 8),
+      username: i === 0 ? "1" : createData(8, possibleCharacters),
+      email: i === 0 ? "1@1.x" : email.toLowerCase(),
+      password: bcryptjs.hashSync(
+        i === 0 ? "1" : createData(8, possibleCharacters),
+        8
+      ),
       registrationDate: Date.now(),
       status: "active",
     };

@@ -24,17 +24,21 @@ userRouter.post(
   [verifyJWToken, verifyAuthTokenRevoke],
   createUser
 );
+
 userRouter.get("/api/users", [verifyJWToken, verifyAuthTokenRevoke], getUsers);
+
 userRouter.get(
   "/api/users/:id",
   [verifyJWToken, verifyAuthTokenRevoke],
   getUserById
 );
-userRouter.put(
-  "/api/users/:id",
+
+userRouter.patch(
+  "/api/users",
   [verifyJWToken, verifyAuthTokenRevoke],
   updateUser
 );
+
 userRouter.delete(
   "/api/users/:id",
   [verifyJWToken, verifyAuthTokenRevoke],

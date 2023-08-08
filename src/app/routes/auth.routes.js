@@ -7,6 +7,7 @@ import {
   signin,
   signout,
   refreshToken,
+  checkAccessToken,
 } from "../controllers/auth.controller.js";
 
 export const authRouter = Router();
@@ -31,3 +32,5 @@ authRouter.post(
 );
 
 authRouter.post("/api/auth/refreshtoken", refreshToken);
+
+authRouter.get("/api/auth/checkaccesstoken", checkAccessToken);

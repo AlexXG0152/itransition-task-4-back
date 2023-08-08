@@ -8,12 +8,11 @@ export default (sequelize, Sequelize) => {
     username: {
       type: Sequelize.STRING,
       allowNull: false,
-      unique: true,
     },
     email: {
       type: Sequelize.STRING,
       allowNull: false,
-      unique: true,
+      // unique: true,
     },
     password: {
       type: Sequelize.STRING,
@@ -24,6 +23,10 @@ export default (sequelize, Sequelize) => {
       allowNull: false,
     },
     deleteDate: {
+      type: Sequelize.DATE,
+      allowNull: true,
+    },
+    lastLoginDate: {
       type: Sequelize.DATE,
       allowNull: true,
     },
