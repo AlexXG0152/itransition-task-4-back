@@ -1,8 +1,11 @@
 import bcryptjs from "bcryptjs";
+import jsonwebtoken from "jsonwebtoken";
 import { db } from "../models/index.js";
 import { signout } from "./auth.controller.js";
 
 const User = db.user;
+const AuthToken = db.AuthToken;
+const RefreshToken = db.refreshToken;
 
 export async function createUser(req, res) {
   try {
@@ -62,8 +65,25 @@ export async function getUserById(req, res) {
 
 export async function updateUser(req, res) {
   try {
+    const token = req.headers.authorization?.split(" ")[1] || "";
     // const { id } = req.params;
-    for (const item of req.body.data) {
+
+    const userID = await checkUserId(token);
+    const foundID = req.body.data.find((i) => i.id === userID);
+
+    if (
+      foundID &&
+      (foundID.status === "blocked" || foundID.status === "deleted")
+    ) {
+      await update(foundID);
+      return res.status(200).json({ message: "Done!" });
+    } else {
+      for (const item of req.body.data) {
+        await update(item);
+      }
+    }
+
+    async function update(item) {
       const { id, username, email, password, status } = item;
 
       const user = await User.findByPk(id);
@@ -78,11 +98,33 @@ export async function updateUser(req, res) {
         user.password = bcryptjs.hashSync(password, 8);
       }
       user.status = status || user.status;
+      if (status === "blocked" || status === "deleted") {
+        AuthToken.destroy({ where: { userId: user.id } });
+        RefreshToken.destroy({ where: { userId: user.id } });
+      }
+      if (status === "deleted") {
+        user.deleteDate = Date.now();
+      }
 
       await user.save();
-
       // res.status(200).json(user);
     }
+
+    async function checkUserId(token) {
+      return jsonwebtoken.verify(
+        token,
+        process.env.JSONWEBTOKEN_SECRET,
+        (err, decoded) => {
+          if (err) {
+            return res.status(401).send({
+              message: "Unauthorized!",
+            });
+          }
+          return decoded.id;
+        }
+      );
+    }
+
     return res.status(200).json({ message: "Done!" });
   } catch (error) {
     console.error(error);
