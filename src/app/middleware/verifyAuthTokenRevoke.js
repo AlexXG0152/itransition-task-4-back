@@ -3,13 +3,14 @@ import { db } from "../models/index.js";
 const AuthToken = db.AuthToken;
 
 export const verifyAuthTokenRevoke = async (req, res, next) => {
-  let token = req.headers.authorization?.split(" ")[1]|| "";
+  let token = req.headers.authorization?.split(" ")[1] || "";
 
   if (!token) {
     return res.status(403).send({
       message: "No token provided!",
     });
   }
+
   try {
     let isTokenActive = await AuthToken.findOne({
       where: {
@@ -18,7 +19,7 @@ export const verifyAuthTokenRevoke = async (req, res, next) => {
     });
 
     if (!isTokenActive) {
-      return res.status(400).send({
+      return res.status(403).send({
         message: "Sign in again!",
       });
     }

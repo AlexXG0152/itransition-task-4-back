@@ -27,7 +27,7 @@ authRouter.post("/api/auth/signin", signin);
 
 authRouter.post(
   "/api/auth/signout",
-  [verifyJWToken, verifyAuthTokenRevoke],
+  [verifyJWToken],
   signout
 );
 

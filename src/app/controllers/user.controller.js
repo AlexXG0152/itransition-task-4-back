@@ -66,66 +66,19 @@ export async function getUserById(req, res) {
 export async function updateUser(req, res) {
   try {
     const token = req.headers.authorization?.split(" ")[1] || "";
-    // const { id } = req.params;
-
     const userID = await checkUserId(token);
     const foundID = req.body.data.find((i) => i.id === userID);
 
-    if (
-      foundID &&
-      (foundID.status === "blocked" || foundID.status === "deleted")
-    ) {
-      await update(foundID);
-      return res.status(200).json({ message: "Done!" });
-    } else {
-      for (const item of req.body.data) {
-        await update(item);
-      }
+    for (const item of req.body.data) {
+      await update(item);
     }
 
-    async function update(item) {
-      const { id, username, email, password, status } = item;
+    const message =
+      foundID && (foundID.status === "blocked" || foundID.status === "deleted")
+        ? "User was blocked"
+        : "Done!";
 
-      const user = await User.findByPk(id);
-
-      if (!user) {
-        return res.status(404).json({ message: "User not found" });
-      }
-
-      user.username = username || user.username;
-      user.email = email || user.email;
-      if (password) {
-        user.password = bcryptjs.hashSync(password, 8);
-      }
-      user.status = status || user.status;
-      if (status === "blocked" || status === "deleted") {
-        AuthToken.destroy({ where: { userId: user.id } });
-        RefreshToken.destroy({ where: { userId: user.id } });
-      }
-      if (status === "deleted") {
-        user.deleteDate = Date.now();
-      }
-
-      await user.save();
-      // res.status(200).json(user);
-    }
-
-    async function checkUserId(token) {
-      return jsonwebtoken.verify(
-        token,
-        process.env.JSONWEBTOKEN_SECRET,
-        (err, decoded) => {
-          if (err) {
-            return res.status(401).send({
-              message: "Unauthorized!",
-            });
-          }
-          return decoded.id;
-        }
-      );
-    }
-
-    return res.status(200).json({ message: "Done!" });
+    return res.status(200).json({ message: message });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Internal server error" });
@@ -151,4 +104,45 @@ export async function deleteUser(req, res) {
     console.error(error);
     res.status(500).json({ message: "Internal server error" });
   }
+}
+
+async function update(item) {
+  const { id, username, email, password, status } = item;
+
+  const user = await User.findByPk(id);
+
+  if (!user) {
+    return res.status(404).json({ message: "User not found" });
+  }
+
+  user.username = username || user.username;
+  user.email = email || user.email;
+  if (password) {
+    user.password = bcryptjs.hashSync(password, 8);
+  }
+  user.status = status || user.status;
+  if (status === "blocked" || status === "deleted") {
+    AuthToken.destroy({ where: { userId: user.id } });
+    RefreshToken.destroy({ where: { userId: user.id } });
+  }
+  if (status === "deleted") {
+    user.deleteDate = Date.now();
+  }
+
+  await user.save();
+}
+
+async function checkUserId(token) {
+  return jsonwebtoken.verify(
+    token,
+    process.env.JSONWEBTOKEN_SECRET,
+    (err, decoded) => {
+      if (err) {
+        return res.status(401).send({
+          message: "Unauthorized!",
+        });
+      }
+      return decoded.id;
+    }
+  );
 }

@@ -22,12 +22,13 @@ export async function signin(req, res) {
     const user = await User.findOne({
       where: {
         email: req.body.email,
-        status: 'active'
       },
     });
 
     if (!user) return res.status(404).send({ message: "User Not found." });
-    if( user.status === "blocked" || user.status === "deleted") return res.status(403).send({ message: "User was block or deleted." })
+    if (user.status === "blocked" || user.status === "deleted") {
+      return res.status(403).send({ message: "User blocked or deleted." });
+    }
 
     const passwordIsValid = bcryptjs.compareSync(
       req.body.password,
